@@ -2,16 +2,31 @@ package main
 
 import (
 	"dropboxshare/route"
+	"dropboxshare/util"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
+	"time"
 )
 
-var port string
-var doc string
+var (
+	startTime = time.Now()
+	port      string
+	doc       string
+)
+
+var sysStatus struct {
+	Uptime       string
+	NumGoroutine int
+	MemAllocated uint64
+	MemTotal     uint64
+	MemSys       uint64
+}
 
 func init() {
 	flag.StringVar(&port, "port", "8090", "give me a port number")
@@ -46,7 +61,18 @@ func main() {
 }
 
 func status(w http.ResponseWriter, r *http.Request) {
-
+	memStat := new(runtime.MemStats)
+	runtime.ReadMemStats(memStat)
+	sysStatus.Uptime = time.Since(startTime).String()
+	sysStatus.NumGoroutine = runtime.NumGoroutine()
+	sysStatus.MemAllocated = memStat.Alloc
+	sysStatus.MemTotal = memStat.TotalAlloc
+	sysStatus.MemSys = memStat.Sys
+	if bs, err := json.Marshal(&sysStatus); err != nil {
+		http.Error(w, fmt.Sprintf("%s", err), 500)
+	} else {
+		util.JsonPut(w, bs)
+	}
 }
 
 func routeMatch(w http.ResponseWriter, r *http.Request) {

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"dropboxshare/util"
 	"encoding/json"
 	_ "fmt"
 	"github.com/tj/go-dropbox"
@@ -58,9 +59,7 @@ func ServeBoxFile(w http.ResponseWriter, r *http.Request, match []string) error 
 		if bs, err := json.Marshal(&res); err != nil {
 			return err
 		} else {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Content-Type", "text/json; charset=utf-8")
-			w.Write(bs)
+			util.JsonPut(w, bs)
 		}
 	} else {
 		w.Header().Set("Content-Length", strconv.Itoa(int(file.Size())))

@@ -21,10 +21,6 @@ var RoutePath = []routeInfo{
 	{regexp.MustCompile(`^/(large|medium|small)/([\w\-]{6,12})\.(jpg|webp)$`), youtube_image},
 }
 
-func index(w http.ResponseWriter, r *http.Request, match []string) {
-	fmt.Println(match)
-}
-
 func files(w http.ResponseWriter, r *http.Request, match []string) {
 	middleware.ServeBoxFile(w, r, match)
 }
