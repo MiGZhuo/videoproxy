@@ -22,10 +22,14 @@ var (
 
 var sysStatus struct {
 	Uptime       string
-	NumGoroutine int
+	GoVersion    string
+	Hostname     string
 	MemAllocated uint64
 	MemTotal     uint64
 	MemSys       uint64
+	NumGoroutine int
+	CpuNum       int
+	Pid          int
 }
 
 func init() {
@@ -68,6 +72,10 @@ func status(w http.ResponseWriter, r *http.Request) {
 	sysStatus.MemAllocated = memStat.Alloc
 	sysStatus.MemTotal = memStat.TotalAlloc
 	sysStatus.MemSys = memStat.Sys
+	sysStatus.CpuNum = runtime.NumCPU()
+	sysStatus.GoVersion = runtime.Version()
+	sysStatus.Hostname, _ = os.Hostname()
+	sysStatus.Pid = os.Getpid()
 	if bs, err := json.Marshal(&sysStatus); err != nil {
 		http.Error(w, fmt.Sprintf("%s", err), 500)
 	} else {
