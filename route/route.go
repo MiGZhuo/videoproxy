@@ -15,8 +15,8 @@ type routeInfo struct {
 
 // 路由添加
 var RoutePath = []routeInfo{
-	{regexp.MustCompile(`^/files/.\*$`), files},
-	{regexp.MustCompile(`^/imgs/.*$`), imgs},
+	{regexp.MustCompile(`^/files/(.*)$`), files},
+	{regexp.MustCompile(`^/imgs/(.*)$`), imgs},
 	{regexp.MustCompile(`^/(large|medium|small)/([\w\-]{6,12})\.(mp4|flv|webm|3gp|json)$`), youtube_video},
 	{regexp.MustCompile(`^/(large|medium|small)/([\w\-]{6,12})\.(jpg|webp)$`), youtube_image},
 }
@@ -26,7 +26,7 @@ func index(w http.ResponseWriter, r *http.Request, match []string) {
 }
 
 func files(w http.ResponseWriter, r *http.Request, match []string) {
-	fmt.Println(match)
+	middleware.ServeBoxFile(w, r, match)
 }
 
 func imgs(w http.ResponseWriter, r *http.Request, match []string) {

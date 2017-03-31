@@ -37,7 +37,7 @@ type videoInfo struct {
 }
 
 func init() {
-	fmt.Println("init youtu")
+
 }
 
 func ServeYoutubeImage(w http.ResponseWriter, r *http.Request, url string) {
@@ -55,9 +55,10 @@ func ServeYoutubeVideo(w http.ResponseWriter, r *http.Request, url string) {
 
 func GetYoutubeVideoUrl(match []string) string {
 	var url string = fmt.Sprintf("%s%s%s", youtube_video_host, match[2], "&asv=3&el=detailpage&hl=en_US")
-	fmt.Println(url)
-	info, err := GetYoutubeVideoMeta(url)
-	fmt.Println(info, err)
+	//fmt.Println(url)
+	// info, err := GetYoutubeVideoMeta(url)
+	GetYoutubeVideoMeta(url)
+	//fmt.Println(info, err)
 
 	return url
 
@@ -70,9 +71,36 @@ func GetYoutubeVideoMeta(u string) (videoInfo, error) {
 		return info, err
 	}
 	values, err := url.ParseQuery(string(bytes))
-	fmt.Println(values)
 	if err != nil {
 		return info, err
+	}
+
+	if v, ok := values["status"]; ok {
+		if v[0] == "ok" {
+			info.Title = values["title"][0]
+			info.Id = values["video_id"][0]
+			info.Duration = values["length_seconds"][0]
+			info.Keywords = values["keywords"][0]
+			info.Author = values["author"][0]
+			var stream = []map[string]string{}
+			streams, err := url.ParseQuery(values["url_encoded_fmt_stream_map"][0])
+			if err != nil {
+				return info, err
+			}
+			for key, value := range streams {
+
+				fmt.Println(key, value)
+				fmt.Println("\r\n")
+
+			}
+			fmt.Println(err, stream)
+
+		} else {
+			return info, fmt.Errorf("got video meta error")
+		}
+	} else {
+		fmt.Println(values)
+		return info, fmt.Errorf("got video meta error")
 	}
 
 	return info, nil
