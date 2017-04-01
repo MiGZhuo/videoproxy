@@ -61,7 +61,8 @@ func main() {
 	http.HandleFunc("/", routeMatch)
 	fmt.Println("Starting up on port " + port)
 	fmt.Println("Document root " + doc)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	bind := fmt.Sprintf("%s:%s", os.Getenv("OPENSHIFT_GO_IP"), os.Getenv("OPENSHIFT_GO_PORT"))
+	log.Fatal(http.ListenAndServe(bind, nil))
 }
 
 func status(w http.ResponseWriter, r *http.Request) {
