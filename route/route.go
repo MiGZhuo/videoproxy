@@ -2,6 +2,7 @@ package route
 
 import (
 	"dropboxshare/middleware"
+	"dropboxshare/util"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -30,8 +31,15 @@ func imgs(w http.ResponseWriter, r *http.Request, match []string) {
 }
 
 func youtube_video(w http.ResponseWriter, r *http.Request, match []string) {
-	var url string = middleware.GetYoutubeVideoUrl(match)
-	middleware.ServeYoutubeVideo(w, r, url)
+	url, jsonData, err := middleware.GetYoutubeVideoUrl(match)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("%s", err), 500)
+	} else if url != "" {
+		middleware.ServeYoutubeVideo(w, r, url)
+	} else {
+		util.JsonPut(w, jsonData)
+	}
+
 }
 
 func youtube_image(w http.ResponseWriter, r *http.Request, match []string) {

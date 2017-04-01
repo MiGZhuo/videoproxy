@@ -3,9 +3,8 @@ package middleware
 import (
 	"dropboxshare/streampipe"
 	"fmt"
+	"github.com/suconghou/youtubeVideoParser"
 	"net/http"
-	"net/url"
-	_ "time"
 )
 
 var youtube_image_map = map[string]string{
@@ -17,27 +16,6 @@ var youtube_image_map = map[string]string{
 var youtube_image_host_map = map[string]string{
 	"jpg":  "http://i.ytimg.com/vi/",
 	"webp": "http://i.ytimg.com/vi_webp/",
-}
-
-var youtube_video_host string = "http://www.youtube.com/get_video_info?video_id="
-
-var youtube_video_map = map[string]string{
-	"large":  "high",
-	"medium": "medium",
-	"small":  "small",
-}
-
-type videoInfo struct {
-	Id       string
-	Title    string
-	Duration string
-	Keywords string
-	Author   string
-	Stream   []map[string]string
-}
-
-func init() {
-
 }
 
 func ServeYoutubeImage(w http.ResponseWriter, r *http.Request, url string) {
@@ -53,55 +31,26 @@ func ServeYoutubeVideo(w http.ResponseWriter, r *http.Request, url string) {
 	streampipe.Pipe(w, r, url)
 }
 
-func GetYoutubeVideoUrl(match []string) string {
-	var url string = fmt.Sprintf("%s%s%s", youtube_video_host, match[2], "&asv=3&el=detailpage&hl=en_US")
-	//fmt.Println(url)
-	// info, err := GetYoutubeVideoMeta(url)
-	GetYoutubeVideoMeta(url)
-	//fmt.Println(info, err)
-
-	return url
-
-}
-
-func GetYoutubeVideoMeta(u string) (videoInfo, error) {
-	bytes, err := streampipe.Get(u)
-	var info videoInfo
+func GetYoutubeVideoUrl(match []string) (string, []byte, error) {
+	var videoId string = match[2]
+	var quality string = match[1]
+	var types string = match[3]
+	info, err := youtubeVideoParser.Parse(videoId)
 	if err != nil {
-		return info, err
+		return "", []byte(""), err
 	}
-	values, err := url.ParseQuery(string(bytes))
-	if err != nil {
-		return info, err
-	}
-
-	if v, ok := values["status"]; ok {
-		if v[0] == "ok" {
-			info.Title = values["title"][0]
-			info.Id = values["video_id"][0]
-			info.Duration = values["length_seconds"][0]
-			info.Keywords = values["keywords"][0]
-			info.Author = values["author"][0]
-			var stream = []map[string]string{}
-			streams, err := url.ParseQuery(values["url_encoded_fmt_stream_map"][0])
-			if err != nil {
-				return info, err
-			}
-			for key, value := range streams {
-
-				fmt.Println(key, value)
-				fmt.Println("\r\n")
-
-			}
-			fmt.Println(err, stream)
-
-		} else {
-			return info, fmt.Errorf("got video meta error")
+	if types == "json" {
+		bs, err := info.ToJson()
+		if err != nil {
+			return "", []byte(""), err
 		}
+		return "", bs, nil
 	} else {
-		fmt.Println(values)
-		return info, fmt.Errorf("got video meta error")
+		url, _, err := info.GetStream(quality, types)
+		if err != nil {
+			return "", []byte(""), err
+		}
+		return url, []byte(""), nil
 	}
 
-	return info, nil
 }
