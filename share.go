@@ -98,12 +98,26 @@ func routeMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func fallback(w http.ResponseWriter, r *http.Request) {
-	var realpath string = filepath.Join(doc, r.URL.Path)
-	if f, err := os.Stat(realpath); err == nil {
-		if f.Mode().IsRegular() {
-			http.ServeFile(w, r, realpath)
-			return
+	var files []string
+	if r.URL.Path == "/" {
+		files = []string{"index.html"}
+	} else {
+		files = []string{r.URL.Path, filepath.Join(r.URL.Path, "index.html")}
+	}
+	if !tryFiles(files, w, r) {
+		http.NotFound(w, r)
+	}
+}
+
+func tryFiles(files []string, w http.ResponseWriter, r *http.Request) bool {
+	for _, file := range files {
+		var realpath string = filepath.Join(doc, file)
+		if f, err := os.Stat(realpath); err == nil {
+			if f.Mode().IsRegular() {
+				http.ServeFile(w, r, realpath)
+				return true
+			}
 		}
 	}
-	http.NotFound(w, r)
+	return false
 }
