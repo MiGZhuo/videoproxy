@@ -23,7 +23,10 @@ var RoutePath = []routeInfo{
 }
 
 func files(w http.ResponseWriter, r *http.Request, match []string) {
-	middleware.ServeBoxFile(w, r, match)
+	err := middleware.ServeBoxFile(w, r, match)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("%s", err), 500)
+	}
 }
 
 func imgs(w http.ResponseWriter, r *http.Request, match []string) {
