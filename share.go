@@ -79,7 +79,7 @@ func status(w http.ResponseWriter, r *http.Request) {
 	if bs, err := json.Marshal(&sysStatus); err != nil {
 		http.Error(w, fmt.Sprintf("%s", err), 500)
 	} else {
-		util.JsonPut(w, bs)
+		util.JsonPut(w, bs, true, 60)
 	}
 }
 

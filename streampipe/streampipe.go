@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func Pipe(w http.ResponseWriter, r *http.Request, url string) error {
+func Pipe(w http.ResponseWriter, r *http.Request, url string, rewriteHeader func(http.ResponseWriter, int, http.Header)) error {
 	client, req, err := initClient(r, url)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("%s", err), 500)
@@ -19,6 +19,9 @@ func Pipe(w http.ResponseWriter, r *http.Request, url string) error {
 			w.Header().Set(key, value[0])
 		}
 		w.WriteHeader(res.StatusCode)
+		if rewriteHeader != nil {
+			rewriteHeader(w, res.StatusCode, res.Header)
+		}
 		defer res.Body.Close()
 		if _, err := io.Copy(w, res.Body); err == nil {
 			return nil

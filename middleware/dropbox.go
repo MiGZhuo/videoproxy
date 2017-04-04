@@ -59,7 +59,7 @@ func ServeBoxFile(w http.ResponseWriter, r *http.Request, match []string) error 
 		if bs, err := json.Marshal(&res); err != nil {
 			return err
 		} else {
-			util.JsonPut(w, bs)
+			util.JsonPut(w, bs, true, 3600)
 		}
 	} else {
 		w.Header().Set("Content-Length", strconv.Itoa(int(file.Size())))
