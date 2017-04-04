@@ -40,7 +40,7 @@ func youtube_video(w http.ResponseWriter, r *http.Request, match []string) {
 	} else if url != "" {
 		middleware.ServeYoutubeVideo(w, r, url)
 	} else {
-		util.JsonPut(w, jsonData)
+		util.JsonPut(w, jsonData, true, 600)
 	}
 
 }

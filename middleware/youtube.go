@@ -19,7 +19,7 @@ var youtube_image_host_map = map[string]string{
 }
 
 func ServeYoutubeImage(w http.ResponseWriter, r *http.Request, url string) {
-	streampipe.Pipe(w, r, url)
+	streampipe.Pipe(w, r, url, nil)
 }
 
 func GetYoutubeImageUrl(match []string) string {
@@ -28,7 +28,7 @@ func GetYoutubeImageUrl(match []string) string {
 }
 
 func ServeYoutubeVideo(w http.ResponseWriter, r *http.Request, url string) {
-	streampipe.Pipe(w, r, url)
+	streampipe.Pipe(w, r, url, nil)
 }
 
 func GetYoutubeVideoUrl(match []string) (string, []byte, error) {
