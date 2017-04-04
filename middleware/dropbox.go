@@ -62,6 +62,8 @@ func ServeBoxFile(w http.ResponseWriter, r *http.Request, match []string) error 
 			util.JsonPut(w, bs, true, 3600)
 		}
 	} else {
+		util.CrossShare(w)
+		util.UseHttpCache(w, 86400)
 		w.Header().Set("Content-Length", strconv.Itoa(int(file.Size())))
 		_, err := io.Copy(w, client.Open(filePath))
 		if err != nil {
